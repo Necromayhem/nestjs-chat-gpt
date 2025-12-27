@@ -5,8 +5,10 @@ import { TelegrafModule } from 'nestjs-telegraf';
 import { BotUpdate } from './updates/bot.update';
 
 @Module({
-  imports: [ConfigModule, TelegrafModule.forRootAsync({
-     inject: [ConfigService],
+  imports: [
+    ConfigModule,
+    TelegrafModule.forRootAsync({
+      inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         return {
           token: configService.getOrThrow('TELEGRAM_BOT_TOKEN'),
