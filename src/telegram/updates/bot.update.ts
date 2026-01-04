@@ -7,6 +7,27 @@ export class BotUpdate {
     ctx.reply('Привет! Чтобы увидеть все команды напишите "меню"');
   }
 
+  @On('new_chat_members')
+  async onNewMembers(@Ctx() ctx) {
+    const members = ctx.message?.new_chat_members ?? [];
+    const myBotId = ctx.botInfo?.id;
+    const addedMe = myBotId
+      ? members.some((m) => m.id === myBotId)
+      : members.some((m) => m.is_bot);
+
+    if (addedMe) {
+      const chatId = ctx.chat.id;
+      console.log('Бота добавили в группу:', chatId);
+
+      await ctx.reply('Привет, я в группе 👋');
+    }
+  }
+
+  @On('message')
+  onAnyMessage(@Ctx() ctx) {
+    console.log('message update:', ctx.update);
+  }
+
   @On('text')
   async showMenu(@Ctx() ctx) {
     const text = ctx.message?.text?.trim().toLowerCase();
@@ -28,7 +49,6 @@ export class BotUpdate {
     } else if (text === 'получить кота' || text === 'кот') {
       const res = await fetch('https://api.thecatapi.com/v1/images/search');
       const data = await res.json();
-      console.log(data);
       ctx.reply(data[0]?.url);
     }
   }

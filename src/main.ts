@@ -1,10 +1,23 @@
 import { NestFactory } from '@nestjs/core';
+import {
+  NestFastifyApplication,
+  FastifyAdapter,
+} from '@nestjs/platform-fastify';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger, VersioningType } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+  const logger = new Logger('text-summarySaasApigateway');
+
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter(),
+  );
+
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -12,5 +25,11 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  const port = process.env.PORT ?? 3000;
+
+  await app.listen(port);
+
+  logger.log(`text-summarySaasApigateway API is running on port ${port}`);
 }
 bootstrap();

@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Version,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -15,6 +16,7 @@ export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
   @Get()
+  @Version('1')
   findAll() {
     return this.blogService.findAll();
   }
