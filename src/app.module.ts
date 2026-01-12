@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { TelegramModule } from './telegram/telegram.module';
 import { BlogModule } from './blog/blog.module';
 import { DatabaseModule } from './database/database.module';
+import { SummarizationModule } from './domains/summarization/summarization.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { DatabaseModule } from './database/database.module';
     DatabaseModule,
     TelegramModule,
     BlogModule,
+    SummarizationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
