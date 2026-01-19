@@ -3,13 +3,29 @@ import { IngestionService } from 'src/domains/ingestion/ingestion.service';
 import { Logger } from '@nestjs/common';
 
 const logger = new Logger('bot update');
+
 @Update()
 export class BotUpdate {
   constructor(private readonly ingestionService: IngestionService) {}
 
   @Command('app')
   async openApp(@Ctx() ctx) {
-    const url = process.env.TG_MINIAPP_URL; // сюда вставим ngrok URL
+    const baseUrl = process.env.TG_MINIAPP_URL;
+    if (!baseUrl) {
+      await ctx.reply('TG_MINIAPP_URL не задан в .env');
+      return;
+    }
+
+    const chatId = ctx.chat?.id;
+    if (!chatId) {
+      await ctx.reply('Не удалось определить chatId');
+      return;
+    }
+
+    // убираем хвостовые слеши, чтобы не получить //?chatId=
+    const cleanBase = String(baseUrl).replace(/\/+$/, '');
+    const url = `${cleanBase}?chatId=${encodeURIComponent(String(chatId))}`;
+
     await ctx.reply('Открыть интерфейс:', {
       reply_markup: {
         inline_keyboard: [[{ text: '📊 Открыть Summary', web_app: { url } }]],
@@ -32,8 +48,7 @@ export class BotUpdate {
 
     if (addedMe) {
       const chatId = ctx.chat.id;
-      logger.log('Бота добавили в группу:', chatId);
-
+      logger.log('Бота добавили в группу: ' + chatId);
       await ctx.reply('Привет, я в группе 👋');
     }
   }
@@ -42,6 +57,7 @@ export class BotUpdate {
   async onAnyMessage(@Ctx() ctx) {
     const msg = ctx.message;
     if (!msg) return;
+
     logger.log(msg);
 
     await this.ingestionService.ingestTelegramMessage({
