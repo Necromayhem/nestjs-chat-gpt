@@ -56,8 +56,16 @@ export class SummarizationWorker implements OnModuleInit {
 
       this.logger.log(`job done jobId=${jobId}`);
     } catch (e: any) {
-      // Если упало прямо в воркере — залогируем
-      this.logger.error(`tick error: ${String(e?.message ?? e)}`, e?.stack);
+      const cause = e?.cause;
+      this.logger.error(`tick error: ${e?.message ?? e}`);
+
+      if (cause) {
+        this.logger.error(
+          `pg cause: ${cause?.message ?? cause} (code=${cause?.code ?? 'n/a'})`,
+        );
+      }
+
+      this.logger.error(e?.stack ?? String(e));
     }
   }
 }

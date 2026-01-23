@@ -1,0 +1,14 @@
+{
+  "name": "summary-bot",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend/tg-miniapp"
+  ],
+  "scripts": {
+    "install:all": "npm install --workspaces",
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  }
+}

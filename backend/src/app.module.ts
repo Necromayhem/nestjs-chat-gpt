@@ -5,7 +5,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 import { TelegramModule } from './telegram/telegram.module';
-import { BlogModule } from './blog/blog.module';
 import { DatabaseModule } from './database/database.module';
 import { SummarizationModule } from './domains/summarization/summarization.module';
 
@@ -14,7 +13,6 @@ import { SummarizationModule } from './domains/summarization/summarization.modul
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
     TelegramModule,
-    BlogModule,
     SummarizationModule,
   ],
   controllers: [AppController],

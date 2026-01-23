@@ -1,1 +1,0 @@
-ALTER TABLE "posts" ADD COLUMN "is_published" boolean DEFAULT false NOT NULL;

@@ -1,1 +1,0 @@
-ALTER TABLE "posts" ADD COLUMN "test_!" varchar DEFAULT 'первая тестовая миграция' NOT NULL;
