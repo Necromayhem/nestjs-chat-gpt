@@ -1,6 +1,17 @@
 <template>
   <div class="section">
-    <div class="sectionTitle">📁 Мои группы</div>
+    <div class="sectionTitleRow">
+      <div class="sectionTitle">📁 Мои группы</div>
+
+      <button
+        v-if="addGroupUrl"
+        class="btnAdd"
+        type="button"
+        @click="onAddGroup"
+      >
+        ➕ Добавить группу
+      </button>
+    </div>
 
     <div v-if="loading" class="muted">Загружаю…</div>
 
@@ -30,18 +41,68 @@ defineProps<{
 defineEmits<{
   (e: 'select', chatId: string): void
 }>()
+
+const botUsernameRaw =
+  (import.meta as any)?.env?.VITE_BOT_USERNAME ||
+  (import.meta as any)?.env?.VITE_TELEGRAM_BOT_USERNAME ||
+  ''
+
+const botUsername = String(botUsernameRaw).replace(/^@/, '').trim()
+const addGroupUrl = botUsername ? `https://t.me/${botUsername}?startgroup=true` : ''
+
+function onAddGroup() {
+  if (!addGroupUrl) return
+
+  const tg = (window as any)?.Telegram?.WebApp
+
+  // ✅ самый правильный вариант именно для Mini App
+  if (tg?.openTelegramLink) {
+    tg.openTelegramLink(addGroupUrl)
+    return
+  }
+
+  // ✅ fallback: некоторые клиенты дают только openLink
+  if (tg?.openLink) {
+    tg.openLink(addGroupUrl)
+    return
+  }
+
+  // ✅ самый простой fallback
+  window.location.href = addGroupUrl
+}
 </script>
 
 <style scoped>
 .section {
   margin-top: 14px;
 }
+.sectionTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
 .sectionTitle {
   font-weight: 800;
   font-size: 14px;
-  margin-bottom: 10px;
   text-align: left;
 }
+
+.btnAdd {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.btnAdd:hover {
+  border-color: rgba(120, 170, 255, 0.6);
+  background: rgba(255, 255, 255, 0.09);
+}
+
 .chatList {
   display: grid;
   gap: 10px;

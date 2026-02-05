@@ -12,7 +12,10 @@ export class BotUpdate {
     private readonly telegramChats: TelegramChatsService,
   ) {}
 
+  @Start()
   async onStart(@Ctx() ctx) {
+    if (ctx.chat?.type !== 'private') return;
+
     const baseUrl = process.env.TG_MINIAPP_URL;
     if (!baseUrl) return ctx.reply('TG_MINIAPP_URL не задан в .env');
 
@@ -26,33 +29,30 @@ export class BotUpdate {
     )
       .replace(/^@/, '')
       .trim();
+
     const addToGroupUrl = botUsername
       ? `https://t.me/${botUsername}?startgroup=true`
       : undefined;
 
-    const isPrivate = ctx.chat?.type === 'private';
-
     const keyboard = {
       inline_keyboard: [
-        [
-          isPrivate
-            ? { text: '📁 Мои группы', web_app: { url: openUrl } }
-            : {
-                text: '📁 Открыть Mini App',
-                url: `https://t.me/${botUsername}`,
-              }, // или openUrl как обычный url
-        ],
+        [{ text: '📁 Открыть Mini App', web_app: { url: openUrl } }],
         ...(addToGroupUrl
           ? [[{ text: '➕ Добавить бота в групповой чат', url: addToGroupUrl }]]
           : []),
       ],
     };
 
-    await ctx.reply('...', { reply_markup: keyboard, parse_mode: 'HTML' });
+    await ctx.reply('Привет! Открой Mini App 👇', {
+      reply_markup: keyboard,
+      parse_mode: 'HTML',
+    });
   }
 
   @Command('app')
   async openApp(@Ctx() ctx) {
+    if (ctx.chat?.type !== 'private') return;
+
     const baseUrl = process.env.TG_MINIAPP_URL;
     if (!baseUrl) return ctx.reply('TG_MINIAPP_URL не задан в .env');
 
@@ -77,6 +77,8 @@ export class BotUpdate {
     const chat = upd.chat;
     const newStatus: string | undefined = upd?.new_chat_member?.status;
 
+    if (chat?.type !== 'group' && chat?.type !== 'supergroup') return;
+
     if (newStatus === 'member' || newStatus === 'administrator') {
       await this.telegramChats.upsertChat({
         chatId: String(chat.id),
@@ -94,30 +96,40 @@ export class BotUpdate {
 
   @On('new_chat_members')
   async onNewMembers(@Ctx() ctx) {
+    const chat: any = ctx.chat;
+
+    // работа только с группами/супергруппами
+    if (chat?.type !== 'group' && chat?.type !== 'supergroup') return;
+
     const members = (ctx.message as any)?.new_chat_members ?? [];
     const myBotId = ctx.botInfo?.id;
 
     const addedMe = myBotId
-      ? members.some((m) => m.id === myBotId)
-      : members.some((m) => m.is_bot);
+      ? members.some((m: any) => m.id === myBotId)
+      : members.some((m: any) => m.is_bot);
 
     if (!addedMe) return;
 
-    const chat = ctx.chat;
+    // регистрация чата
     await this.telegramChats.upsertChat({
       chatId: String(chat.id),
-      type: (chat as any)?.type ?? 'unknown',
-      title: (chat as any)?.title ?? null,
+      type: chat.type ?? 'unknown',
+      title: chat.title ?? null,
     });
 
     logger.log('Бота добавили в группу: ' + chat.id);
-    await ctx.reply('Привет, я в группе 👋');
   }
 
   @On('message')
   async onAnyMessage(@Ctx() ctx) {
     const msg = ctx.message as any;
     if (!msg) return;
+
+    // Никакой обработки лички (и никаких записей в БД)
+    if (msg.chat?.type === 'private') return;
+
+    // На всякий случай: обрабатываем только группы/супергруппы
+    if (msg.chat?.type !== 'group' && msg.chat?.type !== 'supergroup') return;
 
     const chatId = String(msg.chat.id);
 
@@ -140,6 +152,10 @@ export class BotUpdate {
   @On('left_chat_member')
   async onLeftMember(@Ctx() ctx) {
     const msg = ctx.message as any;
+
+    // Игнорир не-группы
+    if (msg?.chat?.type !== 'group' && msg?.chat?.type !== 'supergroup') return;
+
     const left = msg?.left_chat_member;
     const myBotId = ctx.botInfo?.id;
 

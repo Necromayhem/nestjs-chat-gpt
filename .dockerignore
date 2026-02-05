@@ -1,0 +1,42 @@
+# Node dependencies (никогда не копируем)
+node_modules
+**/node_modules
+
+# pnpm store / cache
+.pnpm-store
+**/.pnpm-store
+
+# build outputs
+dist
+**/dist
+build
+**/build
+coverage
+**/coverage
+
+# env / secrets
+.env
+.env.*
+**/.env
+**/.env.*
+
+# logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+
+# git
+.git
+.gitignore
+
+# docker files that don't need to be inside image
+docker-compose*.yml
+Dockerfile.dev

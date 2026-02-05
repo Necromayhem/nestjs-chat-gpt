@@ -14,10 +14,10 @@ async function bootstrap() {
     new FastifyAdapter(),
   );
 
-app.enableCors({
-  origin: true,
-  credentials: true,
-});
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
 
   app.enableVersioning({
     type: VersioningType.URI,
@@ -31,9 +31,9 @@ app.enableCors({
     }),
   );
 
-  const port = process.env.PORT ?? 3000;
+  const port = Number(process.env.PORT ?? 3000);
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
   logger.log(`text-summarySaasApigateway API is running on port ${port}`);
 }
