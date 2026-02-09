@@ -38,5 +38,4 @@ Thumbs.db
 .gitignore
 
 # docker files that don't need to be inside image
-docker-compose*.yml
-Dockerfile.dev
+# docker-compose*.yml потом поменять

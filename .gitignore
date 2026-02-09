@@ -14,3 +14,4 @@ pnpm-debug.log
 .pnpm-store
 .DS_Store
 .dockerignore
+.env
